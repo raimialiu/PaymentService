@@ -1,11 +1,13 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace ProcessPayment.Extensions
@@ -15,6 +17,24 @@ namespace ProcessPayment.Extensions
         public static IApplicationBuilder UseGlobalException(this IApplicationBuilder app)
         {
             return app.UseMiddleware<ExceptionHandlerClass>();
+        }
+
+        public static string GetModelStateErrors(this ModelStateDictionary modelState)
+        {
+            var errors = modelState.SelectMany(x => x.Value.Errors).Select(x => x.ErrorMessage)
+                .ToList();
+            StringBuilder _buildr = new StringBuilder();
+            foreach (string s in errors)
+            {
+                _buildr.Append(s + ",");
+            }
+
+            return _buildr.ToString();
+        }
+
+        public static object GetApiResponse(this ModelStateDictionary modelState)
+        {
+            return new { code = "57", Description = GetModelStateErrors(modelState) };
         }
     }
 
