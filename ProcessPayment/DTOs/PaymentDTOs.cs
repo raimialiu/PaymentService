@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using ProcessPayment.Models;
+using ProcessPayment.Validations;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -15,6 +16,7 @@ namespace ProcessPayment.DTOs
         [Required]
         public string CreditCardNumber { get; set; }
         [Required]
+        [MustNotBeInPast]
         public DateTime ExpirationDate { get; set; }
         [Required]
         public string SecurityCode { get; set; }
