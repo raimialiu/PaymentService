@@ -7,6 +7,88 @@ using System.Threading.Tasks;
 
 namespace ProcessPayment.Services
 {
+    public interface IProccessPaymentService
+    {
+        public string MakePayment(PaymentDTOs dto);
+        
+    }
+
+
+
+
+    public class ProcessPaymentService : IProccessPaymentService
+    {
+        private ProcessPayment service;
+        
+        ICheapPaymentGateway cheapPaymentGateway;
+        IPremiumPaymentGateway premiumPaymentGateway;
+        IExpensivePaymentGateway expensivePaymentGateway;
+        public ProcessPaymentService(ICheapPaymentGateway cheapPaymentGateway, IPremiumPaymentGateway premiumPaymentGateway,
+            IExpensivePaymentGateway expensivePaymentGateway)
+        {
+            service = new ProcessPayment();
+            this.expensivePaymentGateway = expensivePaymentGateway;
+            this.cheapPaymentGateway = cheapPaymentGateway;
+            this.premiumPaymentGateway = premiumPaymentGateway;
+        }
+        private bool isExpensivePaymentAvailable()
+        {
+            // this is just a simple and assumed logic to determine if Expensive payment gateway is available
+            var random = new Random();
+            var next = random.Next(1, 99);
+
+            return next % 2 == 0;
+        }
+        public string MakePayment(PaymentDTOs dto)
+        {
+            if (dto.Amount < 20)
+            {
+                var result = service.MakePayment(cheapPaymentGateway, dto);
+                if (result)
+                {
+                    return PaymentStates.SUCCESS;
+                }
+
+                return PaymentStates.FAILED;
+            }
+
+            if (dto.Amount >= 21 && dto.Amount <= 500)
+            {
+                bool isExpensivePaymentAvaiable = isExpensivePaymentAvailable();
+
+                if (isExpensivePaymentAvaiable)
+                {
+                    bool result = service.MakePayment(expensivePaymentGateway, dto);
+                    if (result)
+                    {
+                        return PaymentStates.SUCCESS;
+                    }
+
+                    result = service.MakePayment(cheapPaymentGateway, dto);
+                    if (result)
+                    {
+                        return PaymentStates.SUCCESS;
+                    }
+
+                    return PaymentStates.FAILED;
+                }
+            }
+
+            if (dto.Amount > 500)
+            {
+                var result = service.MakePayment(premiumPaymentGateway, dto);
+
+                if(result)
+                {
+                    return PaymentStates.SUCCESS;
+                }
+
+                return PaymentStates.FAILED;
+            }
+
+            return PaymentStates.FAILED;
+        }
+    }
     public interface ICheapPaymentGateway : IProcessPayment
     {
     }
@@ -113,30 +195,10 @@ namespace ProcessPayment.Services
     }
 
 
-    public class ProcessPayment : IProcessPayment
+    public class ProcessPayment
     {
-        private ProcessPaymentDbContext _ctx;
-        private IProcessPayment _payment;
-
-        private ProcessPayment instance;
-
-        private object lockArea = new object();
-        public ProcessPayment createInstance(IProcessPayment payment)
-        {
-            lock(lockArea)
-            {
-                if (instance == null)
-                    return new ProcessPayment(payment);
-            }
-            
-            return instance;
-        }
-        private ProcessPayment(IProcessPayment pay)
-        {
-            _ctx = new ProcessPaymentDbContext();
-            this._payment = pay;
-        }
-        public bool MakePayment(PaymentDTOs dto)
+       
+        public bool MakePayment(IProcessPayment _payment, PaymentDTOs dto)
         {
             return _payment.MakePayment(dto);
         }

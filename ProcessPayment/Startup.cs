@@ -4,7 +4,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
 using ProcessPayment.Extensions;
+using ProcessPayment.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,6 +30,15 @@ namespace ProcessPayment
                     x.SuppressModelStateInvalidFilter = true;
                 }
                 );
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "PaymentService.API", Version = "v1" });
+            });
+            services.AddTransient<IProccessPaymentService, ProcessPaymentService>();
+           // services.AddTransient<IProcessPayment, Services.ProcessPayment>();
+            services.AddTransient<ICheapPaymentGateway, CheapPaymentGateway>();
+            services.AddTransient<IPremiumPaymentGateway, PremiumPaymentGateway>();
+            services.AddTransient<IExpensivePaymentGateway, ExpensivePaymentGatewaye>();
         }
 
         private IConfiguration config { get; set; }
@@ -39,6 +50,10 @@ namespace ProcessPayment
             {
                 app.UseDeveloperExceptionPage();
             }
+
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Payment Service"));
 
             app.UseRouting();
 

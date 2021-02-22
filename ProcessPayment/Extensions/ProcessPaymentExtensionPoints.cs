@@ -41,11 +41,11 @@ namespace ProcessPayment.Extensions
     public class ExceptionHandlerClass
     {
         private RequestDelegate _next;
-        private ILogger log;
-        public ExceptionHandlerClass(RequestDelegate next, ILogger log)
+        //private ILogger log;
+        public ExceptionHandlerClass(RequestDelegate next)
         {
             _next = next;
-            this.log = log;
+            //this.log = log;
         }
 
         public async Task InvokeAsync(HttpContext context)
@@ -65,7 +65,7 @@ namespace ProcessPayment.Extensions
 
         private Task HandleAsync(HttpContext ctx, Exception es)
         {
-            log.LogError(es.Message);
+            //log.LogError(es.Message);
             ctx.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
             ctx.Response.ContentType = "application/json";
 
