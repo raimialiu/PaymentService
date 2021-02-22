@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,26 @@ namespace ProcessPayment
     {
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            Log.Logger = new LoggerConfiguration()
+                            .Enrich.FromLogContext()
+                            .Enrich.WithProperty("MicroserviceName", "Paygate")
+                           .WriteTo.Console().CreateLogger();
+
+            try
+            {
+                Log.Information("Service Starting up at " + DateTime.Now.ToString());
+                CreateHostBuilder(args).Build().Run();
+            }
+            catch (Exception es)
+            {
+
+                Log.Error(es.Message);
+            }
+            finally
+            {
+                Log.CloseAndFlush();
+            }
+            
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
