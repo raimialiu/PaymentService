@@ -37,6 +37,7 @@ namespace ProcessPayment.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int PaymentStateId { get; set; }
         public string state { get; set; }
+        public int paymentId { get; set; }
     }
 
     public class ProcessPaymentDbContext:DbContext

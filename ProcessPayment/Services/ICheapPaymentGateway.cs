@@ -7,10 +7,71 @@ using System.Threading.Tasks;
 
 namespace ProcessPayment.Services
 {
-    public interface ICheapPaymentGateway:IProcessPayment
+    public interface ICheapPaymentGateway : IProcessPayment
     {
     }
 
+    public interface IPremiumPaymentGateway : IProcessPayment { }
+
+    public class CheapPaymentGateway:ICheapPaymentGateway
+    {
+        private ProcessPaymentDbContext _db;
+
+        public CheapPaymentGateway()
+        {
+            _db = new ProcessPaymentDbContext();
+        }
+        public bool MakePayment(PaymentDTOs dto)
+        {
+            var requestModel = (Payment)dto;
+            _db.payments.Add(requestModel);
+
+            bool status = _db.SaveChanges() > 0;
+
+            if (status)
+            {
+                _db.paymentState.Add(new PaymentState()
+                {
+                    state = PaymentStates.SUCCESS,
+                    paymentId = requestModel.PaymentId
+                });
+
+                return _db.SaveChanges() > 0;
+            }
+
+            return false;
+        }
+    }
+
+    public class PremiumPaymentGateway : IPremiumPaymentGateway
+    {
+        private ProcessPaymentDbContext _db;
+
+        public PremiumPaymentGateway()
+        {
+            _db = new ProcessPaymentDbContext();
+        }
+        public bool MakePayment(PaymentDTOs dto)
+        {
+            var requestModel = (Payment)dto;
+            _db.payments.Add(requestModel);
+
+            bool status = _db.SaveChanges() > 0;
+
+            if (status)
+            {
+                _db.paymentState.Add(new PaymentState()
+                {
+                    state = PaymentStates.SUCCESS,
+                    paymentId = requestModel.PaymentId
+                });
+
+                return _db.SaveChanges() > 0;
+            }
+
+            return false;
+        }
+    }
     public interface IExpensivePaymentGateway:IProcessPayment
     {
 
@@ -35,8 +96,11 @@ namespace ProcessPayment.Services
             {
                 _db.paymentState.Add(new PaymentState()
                 {
-                     
+                    state = PaymentStates.SUCCESS,
+                    paymentId = requestModel.PaymentId
                 });
+
+                return _db.SaveChanges() > 0;
             }
 
             return false;
