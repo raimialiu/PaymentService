@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using ProcessPayment.Models;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -19,5 +21,10 @@ namespace ProcessPayment.DTOs
         [Required]
         
         public decimal Amount { get; set; }
+
+        public static explicit operator Payment(PaymentDTOs s)
+        {
+            return JsonConvert.DeserializeObject<Payment>(JsonConvert.SerializeObject(s));
+        }
     }
 }

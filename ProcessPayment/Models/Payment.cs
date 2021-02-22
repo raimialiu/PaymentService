@@ -24,7 +24,12 @@ namespace ProcessPayment.Models
         public PaymentState state { get; set; }
     }
 
-    
+    public class PaymentStates
+    {
+        public const string SUCCESS = "success";
+        public const string FAILED = "failed";
+        public const string PENDING = "pending";
+    }
 
     public class PaymentState
     {
